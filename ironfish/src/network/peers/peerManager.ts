@@ -156,7 +156,7 @@ export class PeerManager {
   ) {
     this.logger = logger.withTag('peermanager')
     this.addressManager = addressManager
-    this.metrics = metrics || new MetricsMonitor(this.logger)
+    this.metrics = metrics || new MetricsMonitor({ logger: this.logger })
     this.localPeer = localPeer
     this.maxPeers = maxPeers
     this.targetPeers = targetPeers
