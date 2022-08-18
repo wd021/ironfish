@@ -583,20 +583,28 @@ export class Accounts {
     this.scan = null
   }
 
-  async getBalance(account: Account): Promise<{ unconfirmed: BigInt; confirmed: BigInt }> {
+  async getBalance(
+    account: Account,
+  ): Promise<{ unconfirmed: BigInt; confirmed: BigInt; headHash: string | null; }> {
     this.assertHasAccount(account)
     const headHash = await account.getHeadHash()
     if (!headHash) {
       return {
         unconfirmed: BigInt(0),
         confirmed: BigInt(0),
+        headHash: null,
       }
     }
     const header = await this.chain.getHeader(Buffer.from(headHash, 'hex'))
     Assert.isNotNull(header, `Missing block header for hash '${headHash}'`)
     const headSequence = header.sequence
     const unconfirmedSequenceStart = headSequence - this.config.get('minimumBlockConfirmations')
-    return account.getBalance(unconfirmedSequenceStart, headSequence)
+    const accountBalance = await account.getBalance(unconfirmedSequenceStart, headSequence)
+    return {
+      unconfirmed: accountBalance.unconfirmed,
+      confirmed: accountBalance.confirmed,
+      headHash,
+    }
   }
 
   private async getUnspentNotes(account: Account): Promise<

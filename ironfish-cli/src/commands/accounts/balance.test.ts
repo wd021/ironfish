@@ -9,6 +9,7 @@ describe('accounts:balance', () => {
     account: 'default',
     confirmed: '5',
     unconfirmed: '10',
+    headHash: '123'
   }
 
   beforeAll(() => {
