@@ -550,7 +550,9 @@ export class Accounts {
     this.scan = null
   }
 
-  async getBalance(account: Account): Promise<{ unconfirmed: BigInt; confirmed: BigInt }> {
+  async getBalance(
+    account: Account,
+  ): Promise<{ unconfirmed: BigInt; confirmed: BigInt; headHash: string | null }> {
     return await this.db.database.transaction(async (tx) => {
       this.assertHasAccount(account)
 
@@ -559,6 +561,7 @@ export class Accounts {
         return {
           unconfirmed: BigInt(0),
           confirmed: BigInt(0),
+          headHash: null,
         }
       }
 
@@ -569,7 +572,17 @@ export class Accounts {
       const unconfirmedSequenceStart =
         headSequence - this.config.get('minimumBlockConfirmations')
 
-      return account.getBalance(unconfirmedSequenceStart, headSequence, tx)
+      const accountBalance = await account.getBalance(
+        unconfirmedSequenceStart,
+        headSequence,
+        tx,
+      )
+
+      return {
+        unconfirmed: accountBalance.unconfirmed,
+        confirmed: accountBalance.confirmed,
+        headHash,
+      }
     })
   }
 
