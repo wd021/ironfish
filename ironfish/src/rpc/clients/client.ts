@@ -63,6 +63,10 @@ import { ImportAccountRequest, ImportAccountResponse } from '../routes/accounts/
 import { RemoveAccountRequest, RemoveAccountResponse } from '../routes/accounts/removeAccount'
 import { RescanAccountRequest, RescanAccountResponse } from '../routes/accounts/rescanAccount'
 import {
+  RescanAccountHackRequest,
+  RescanAccountHackResponse,
+} from '../routes/accounts/rescanAccountHack'
+import {
   ExportChainStreamRequest,
   ExportChainStreamResponse,
 } from '../routes/chain/exportChain'
@@ -175,6 +179,15 @@ export abstract class RpcClient {
   ): RpcResponse<void, RescanAccountResponse> {
     return this.request<void, RescanAccountResponse>(
       `${ApiNamespace.account}/rescanAccount`,
+      params,
+    )
+  }
+
+  rescanAccountHackStream(
+    params: RescanAccountHackRequest,
+  ): RpcResponse<void, RescanAccountHackResponse> {
+    return this.request<void, RescanAccountHackResponse>(
+      `${ApiNamespace.account}/rescanAccountHack`,
       params,
     )
   }

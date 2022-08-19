@@ -38,6 +38,7 @@ export class Accounts {
   readonly onTransactionCreated = new Event<[transaction: Transaction]>()
 
   scan: ScanState | null = null
+  scanB: ScanState | null = null
   updateHeadState: ScanState | null = null
 
   protected readonly headHashes = new Map<string, string | null>()
@@ -581,6 +582,333 @@ export class Accounts {
 
     scan.signalComplete()
     this.scan = null
+  }
+
+  async scanTransactionFromBlockToBlock(
+    id: string,
+    startHash: Buffer,
+    endHash: Buffer,
+    accounts: Array<Account>,
+    scanB: ScanState,
+  ): Promise<void> {
+    scanB.onTransactionHack.emit(`${id} (start)`)
+    let i = 0
+
+    for await (const blockHeader of this.chain.iterateBlockHeaders(
+      startHash,
+      endHash,
+      undefined,
+      false,
+    )) {
+      i++
+
+      for await (const {
+        blockHash,
+        transaction,
+        initialNoteIndex,
+        sequence,
+      } of this.chain.iterateBlockTransactions(blockHeader)) {
+        await this.syncTransaction(
+          transaction,
+          {
+            blockHash: blockHash.toString('hex'),
+            initialNoteIndex,
+            sequence,
+          },
+          accounts,
+        )
+      }
+
+      if (i % 100 === 0) {
+        scanB.onTransactionHack.emit(`${id} (progress txs) - ${(i / 10000) * 100}%`)
+      }
+    }
+
+    scanB.onTransactionHack.emit(`${id} (end)`)
+  }
+
+  async scanTransactionsHack(accountName: string): Promise<void> {
+    if (!this.isOpen) {
+      throw new Error('Cannot start a scan if accounts are not loaded')
+    }
+
+    const account = this.getAccountByName(accountName)
+    Assert.isNotNull(account, `account not null`)
+    const accounts: Array<Account> = [account]
+
+    const scanB = new ScanState()
+    this.scanB = scanB
+
+    scanB.onTransactionHack.emit(`(start scan) ${(account.publicAddress, account.id)}`)
+
+    // block 1 to 10k
+    const block1to10kId = `[block 1 to 10k]`
+    const block1Hash = Buffer.from(
+      '69e263e931fa1a2a4b0437a8eff79ffb7a353b6384a7aeac9f90ac12ae4811ef',
+      'hex',
+    )
+    const block10kHash = Buffer.from(
+      '00000000000d144c7b39fa29d9c258d2022f5891f02a8382d26c054f835412c9',
+      'hex',
+    )
+
+    // block 10k to 20k
+    const block10kto20kId = `[block 10k to 20k]`
+    const block10k1Hash = Buffer.from(
+      '00000000000f27430eec3023a7d824d4013d9feba91ed6744d6fa14df523ee05',
+      'hex',
+    )
+    const block20kHash = Buffer.from(
+      '00000000000ce9db255815e2704416bc0f352561546aa7dbe442ec429416b66e',
+      'hex',
+    )
+
+    // block 20k to 30k
+    const block20kto30kId = `[block 20k to 30k]`
+    const block20k1Hash = Buffer.from(
+      '00000000000a52144d99eff94fd83045b9530781164f882bd0a1630d99cd5059',
+      'hex',
+    )
+    const block30kHash = Buffer.from(
+      '00000000000af457de1562bb6e1dac3f2f38de19678590d52a96f05ab543a319',
+      'hex',
+    )
+
+    // block 30k to 40k
+    const block30kto40kId = `[block 30k to 40k]`
+    const block30k1Hash = Buffer.from(
+      '0000000000095a4d57db4a676bdf76963538489ab01bbeabb773d8945b0ab644',
+      'hex',
+    )
+    const block40kHash = Buffer.from(
+      '00000000000365c92e472566421310cc3e1973059fe2ce9bfffafce597b01926',
+      'hex',
+    )
+
+    // block 40k to 50k
+    const block40kto50kId = `[block 40k to 50k]`
+    const block40k1Hash = Buffer.from(
+      '000000000006f6f371a8934e274274808ee87d5100a820ea6297119bb718ea8c',
+      'hex',
+    )
+    const block50kHash = Buffer.from(
+      '000000000001fd44695ecaff812501a1a7472a20d089e3f8406cdd117833aaf4',
+      'hex',
+    )
+
+    // block 50k to 60k
+    const block50kto60kId = `[block 50k to 60k]`
+    const block50k1Hash = Buffer.from(
+      '00000000000169af615eb8127a3ca012945941facf6c9a877da26d2ed06fc589',
+      'hex',
+    )
+    const block60kHash = Buffer.from(
+      '0000000000043fc59a2c26f72f67d446e384606b719147b463f5e1d080c7b8f5',
+      'hex',
+    )
+
+    // block 60k to 70k
+    const block60kto70kId = `[block 60k to 70k]`
+    const block60k1Hash = Buffer.from(
+      '000000000003c79596fa7bc2f173fdf66a8d98614d67fa9c3854572b5665a128',
+      'hex',
+    )
+    const block70kHash = Buffer.from(
+      '00000000000774b7abcddae9f7c6b88909399547b2a97b7016fa925825934860',
+      'hex',
+    )
+
+    // block 70k to 80k
+    const block70kto80kId = `[block 70k to 80k]`
+    const block70k1Hash = Buffer.from(
+      '00000000000c84595d274689d6be0382a6592ee55c6488f7e043f560de535d3d',
+      'hex',
+    )
+    const block80kHash = Buffer.from(
+      '000000000004ef6adf764a764b5680e896142763d2f952845c1c67b55da0e2b6',
+      'hex',
+    )
+
+    // block 80k to 90k
+    const block80kto90kId = `[block 80k to 90k]`
+    const block80k1Hash = Buffer.from(
+      '00000000000110fbec1574bfd8538994f331da45f01959a0aa099a57e3a9704a',
+      'hex',
+    )
+    const block90kHash = Buffer.from(
+      '00000000000abe864e35a620067c8635950f94e5f8959fcf83e6647bef76815e',
+      'hex',
+    )
+
+    // block 90k to 100k
+    const block90kto100kId = `[block 90k to 100k]`
+    const block90k1Hash = Buffer.from(
+      '00000000000832a99fe95e6b950e4bce3812bd3bf307110d5d24502b65a808a8',
+      'hex',
+    )
+    const block100kHash = Buffer.from(
+      '00000000000903d05a6cdbc50665da787035af22a56bec9448a4207ad3eefd00',
+      'hex',
+    )
+
+    // block 100k to 110k
+    const block100kto110kId = `[block 100k to 110k]`
+    const block100k1Hash = Buffer.from(
+      '0000000000015dabbb321d2ddaa3ee0c5e453068b8a7092ea29c382a41c3215c',
+      'hex',
+    )
+    const block110kHash = Buffer.from(
+      '000000000006327ba0f5bfa67957199b1f7fc3fc262741eaefd55fdcfe7a5ba5',
+      'hex',
+    )
+
+    // block 110k to 120k
+    const block110kto120kId = `[block 110k to 120k]`
+    const block110k1Hash = Buffer.from(
+      '000000000004ffc41e999621f527cccd67f2e21b711cb6a9ab6017c329a0b957',
+      'hex',
+    )
+    const block120kHash = Buffer.from(
+      '000000000001c891d48b9352a8ec9412962165cfd05ed84e95a7a3e9f289f9cd',
+      'hex',
+    )
+
+    // block 120k to 130k
+    const block120kto130kId = `[block 120k to 130k]`
+    const block120k1Hash = Buffer.from(
+      '000000000000e0f464586d8e481df64bd54fea088b2a1c9e20eba7e209d40a15',
+      'hex',
+    )
+    const block130kHash = Buffer.from(
+      '0000000000040c6faa8d3b8e71c68e6609a5031e645b18f66cbcf7886c00a32c',
+      'hex',
+    )
+
+    // block 130k to 140k
+    const block130kto140kId = `[block 130k to 140k]`
+    const block130k1Hash = Buffer.from(
+      '00000000000877f4940643232e26b99e267c1f492b1027ce8a655330bad2add2',
+      'hex',
+    )
+    const block140kHash = Buffer.from(
+      '0000000000055efaff6ab2c15d1feed1dc2382b8e52c225ec1363e84f5226d8c',
+      'hex',
+    )
+
+    scanB.onTransactionHack.emit(`(start)`)
+
+    await Promise.all([
+      this.scanTransactionFromBlockToBlock(
+        block1to10kId,
+        block1Hash,
+        block10kHash,
+        accounts,
+        scanB,
+      ),
+      this.scanTransactionFromBlockToBlock(
+        block10kto20kId,
+        block10k1Hash,
+        block20kHash,
+        accounts,
+        scanB,
+      ),
+      this.scanTransactionFromBlockToBlock(
+        block20kto30kId,
+        block20k1Hash,
+        block30kHash,
+        accounts,
+        scanB,
+      ),
+      this.scanTransactionFromBlockToBlock(
+        block30kto40kId,
+        block30k1Hash,
+        block40kHash,
+        accounts,
+        scanB,
+      ),
+      this.scanTransactionFromBlockToBlock(
+        block40kto50kId,
+        block40k1Hash,
+        block50kHash,
+        accounts,
+        scanB,
+      ),
+      this.scanTransactionFromBlockToBlock(
+        block50kto60kId,
+        block50k1Hash,
+        block60kHash,
+        accounts,
+        scanB,
+      ),
+      this.scanTransactionFromBlockToBlock(
+        block60kto70kId,
+        block60k1Hash,
+        block70kHash,
+        accounts,
+        scanB,
+      ),
+      this.scanTransactionFromBlockToBlock(
+        block70kto80kId,
+        block70k1Hash,
+        block80kHash,
+        accounts,
+        scanB,
+      ),
+      this.scanTransactionFromBlockToBlock(
+        block80kto90kId,
+        block80k1Hash,
+        block90kHash,
+        accounts,
+        scanB,
+      ),
+      this.scanTransactionFromBlockToBlock(
+        block90kto100kId,
+        block90k1Hash,
+        block100kHash,
+        accounts,
+        scanB,
+      ),
+      this.scanTransactionFromBlockToBlock(
+        block100kto110kId,
+        block100k1Hash,
+        block110kHash,
+        accounts,
+        scanB,
+      ),
+      this.scanTransactionFromBlockToBlock(
+        block110kto120kId,
+        block110k1Hash,
+        block120kHash,
+        accounts,
+        scanB,
+      ),
+      this.scanTransactionFromBlockToBlock(
+        block120kto130kId,
+        block120k1Hash,
+        block130kHash,
+        accounts,
+        scanB,
+      ),
+      this.scanTransactionFromBlockToBlock(
+        block130kto140kId,
+        block130k1Hash,
+        block140kHash,
+        accounts,
+        scanB,
+      ),
+    ])
+
+    scanB.onTransactionHack.emit(`(end)`)
+
+    // last block hash
+    await this.updateHeadHash(account, block140kHash)
+
+    scanB.onTransactionHack.emit(`(updated account head hash)`)
+
+    await new Promise((r) => setTimeout(r, 2000))
+
+    scanB.signalComplete()
+    this.scanB = null
   }
 
   async getBalance(
@@ -1128,6 +1456,7 @@ export class Accounts {
 
 export class ScanState {
   onTransaction = new Event<[sequence: number, endSequence: number]>()
+  onTransactionHack = new Event<[note: string]>()
 
   readonly startedAt: number
   readonly abortController: AbortController
