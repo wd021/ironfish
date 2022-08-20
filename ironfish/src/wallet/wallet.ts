@@ -2,6 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 import { generateKey, generateNewPublicAddress } from '@ironfish/rust-nodejs'
+import cluster from 'cluster'
+import os from 'os'
+import process from 'process'
 import { v4 as uuid } from 'uuid'
 import { Assert } from '../assert'
 import { Blockchain } from '../blockchain'
@@ -591,7 +594,7 @@ export class Accounts {
     accounts: Array<Account>,
     scanB: ScanState,
   ): Promise<void> {
-    scanB.onTransactionHack.emit(`${id} (start)`)
+    scanB.onTransactionHack.emit(`${id} (start) - ${startHash.toString('hex')}`)
     let i = 0
 
     for await (const blockHeader of this.chain.iterateBlockHeaders(
@@ -627,19 +630,42 @@ export class Accounts {
     scanB.onTransactionHack.emit(`${id} (end)`)
   }
 
-  async scanTransactionsHack(accountName: string): Promise<void> {
+  async scanTransactionsHack(accountNames: Array<string>): Promise<void> {
+    const cpus = os.cpus
+    const numCPUs = cpus().length
+
     if (!this.isOpen) {
       throw new Error('Cannot start a scan if accounts are not loaded')
     }
 
-    const account = this.getAccountByName(accountName)
-    Assert.isNotNull(account, `account not null`)
-    const accounts: Array<Account> = [account]
+    const accounts: Array<Account> = []
+
+    for (const accountName of accountNames) {
+      const account = this.getAccountByName(accountName)
+      Assert.isNotNull(account, `account not null`)
+      accounts.push(account)
+    }
 
     const scanB = new ScanState()
     this.scanB = scanB
 
-    scanB.onTransactionHack.emit(`(start scan) ${(account.publicAddress, account.id)}`)
+    scanB.onTransactionHack.emit(
+      `(start scan) ${accountNames.toString().split(',').join(', ')}`,
+    )
+    scanB.onTransactionHack.emit(
+      `(start scan) PID ${process.pid} is running, numCPUs ${numCPUs}`,
+    )
+
+    // Fork workers.
+    /*
+      for (let i = 0; i < numCPUs; i++) {
+        cluster.fork()
+      }
+
+      cluster.on('exit', (worker, code, signal) => {
+        scanB.onTransactionHack.emit(`(worker died) ${worker.process.pid || ''}`)
+      })
+    */
 
     // block 1 to 10k
     const block1to10kId = `[block 1 to 10k]`
@@ -785,13 +811,13 @@ export class Accounts {
     )
 
     // block 130k to 140k
-    const block130kto140kId = `[block 130k to 140k]`
+    const block130kto140kId = `[block 130k to 145k]`
     const block130k1Hash = Buffer.from(
       '00000000000877f4940643232e26b99e267c1f492b1027ce8a655330bad2add2',
       'hex',
     )
-    const block140kHash = Buffer.from(
-      '0000000000055efaff6ab2c15d1feed1dc2382b8e52c225ec1363e84f5226d8c',
+    const block145kHash = Buffer.from(
+      '0000000000031b7f4722f8966ba019b4f0ea9320800156fb7598f979a7879dea',
       'hex',
     )
 
@@ -892,7 +918,7 @@ export class Accounts {
       this.scanTransactionFromBlockToBlock(
         block130kto140kId,
         block130k1Hash,
-        block140kHash,
+        block145kHash,
         accounts,
         scanB,
       ),
@@ -900,8 +926,10 @@ export class Accounts {
 
     scanB.onTransactionHack.emit(`(end)`)
 
-    // last block hash
-    await this.updateHeadHash(account, block140kHash)
+    // update last block hash
+    for (const account of accounts) {
+      await this.updateHeadHash(account, block145kHash)
+    }
 
     scanB.onTransactionHack.emit(`(updated account head hash)`)
 
@@ -913,7 +941,7 @@ export class Accounts {
 
   async getBalance(
     account: Account,
-  ): Promise<{ unconfirmed: BigInt; confirmed: BigInt; headHash: string | null; }> {
+  ): Promise<{ unconfirmed: BigInt; confirmed: BigInt; headHash: string | null }> {
     this.assertHasAccount(account)
     const headHash = await account.getHeadHash()
     if (!headHash) {
