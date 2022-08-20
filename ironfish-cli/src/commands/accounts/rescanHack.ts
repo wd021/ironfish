@@ -16,9 +16,9 @@ export class RescanCommand extends IronfishCommand {
     const client = await this.sdk.connectRpc(true)
     const response = client.rescanAccountHackStream({
       accountNames: [
-        'e75d0350191a2439e2e552562ee93c32233c5f69f8f7c9d9243ff72374700be25c99bae01b9c2570b09b61',
-        'bee1ec28ec9e86efdd3bd654d8d64b1f902115eae49176671c57262167034d0c0c462bcd05ec8bdfe7978a',
-        '3667e9f2d94c646146f4715dbb1c2ed9d96c564cfea04ad7a484d2f9064e6c926aab86f83b6633f98685a0',
+        '6446517f513c182155c0bbd8de10c5f06f884926772e2fbc8b65e7d9803909fab8a07086f5b373b475c0be',
+        '4a875a5d2e0dc67fe5bd2b713a274d869614914c0089749a4de98a265bd64bd6d56c0413e3ac2f33b15686',
+        '40328a5f6f3d3500a475785f579f95629dd2ad7ae7afc2629ba3f09a08b6dc0584ba1baa94a39ccbf51e63',
       ],
     })
 
