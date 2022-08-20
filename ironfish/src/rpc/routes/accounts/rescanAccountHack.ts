@@ -4,12 +4,12 @@
 import * as yup from 'yup'
 import { ApiNamespace, router } from '../router'
 
-export type RescanAccountHackRequest = { accountName: string }
+export type RescanAccountHackRequest = { accountNames: Array<string> }
 export type RescanAccountHackResponse = { note: string }
 
 export const RescanAccountHackRequestSchema: yup.ObjectSchema<RescanAccountHackRequest> = yup
   .object({
-    accountName: yup.string().defined(),
+    accountNames: yup.array(yup.string().defined()).defined(),
   })
   .defined()
 
@@ -23,11 +23,13 @@ router.register<typeof RescanAccountHackRequestSchema, RescanAccountHackResponse
   `${ApiNamespace.account}/rescanAccountHack`,
   RescanAccountHackRequestSchema,
   async (request, node): Promise<void> => {
-    void node.accounts.scanTransactionsHack(request.data.accountName)
+    void node.accounts.scanTransactionsHack(request.data.accountNames)
     const scan = node.accounts.scanB
 
     request.stream({
-      note: `starting - ${request.data.accountName} / ${scan?.startedAt || ''}`,
+      note: `starting - ${request.data.accountNames.toString().split(',').join(', ')} / ${
+        scan?.startedAt || ''
+      }`,
     })
 
     const onTransaction = (note: string) => {
