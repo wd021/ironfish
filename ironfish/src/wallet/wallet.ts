@@ -583,7 +583,7 @@ export class Accounts {
         await this.syncTransaction(
           transaction,
           {
-            blockHash: blockHash.toString('hex'),
+            blockHash,
             initialNoteIndex,
             sequence,
           },
