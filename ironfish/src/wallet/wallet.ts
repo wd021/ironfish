@@ -991,6 +991,21 @@ export class Accounts {
         startHash: '000000000000a5b50f71e30fb06b42de330757efaab0173344fc7ebd2decf8b8',
         endHash: '00000000000241b9307c9d6b2f91732170c12ccee2c4b76524cab2c86e127519',
       },
+      {
+        id: '[block 146k to 148k]',
+        startHash: '000000000002826d78cae63b1ad742626c3df238fbcee8d50a1d3e39173f7299',
+        endHash: '0000000000002e7ffb1546545742a9cdc1110218458b1cbc1e5653e2343793c6',
+      },
+      {
+        id: '[block 148k to 150k]',
+        startHash: '00000000000393500af8818d4e08429116672001ee7a6c7ec5b1bba3e97c6a1c',
+        endHash: '0000000000073d82a4d28444ceb1a968c3f5ce6808583e71f40a055eb183bfc6',
+      },
+      {
+        id: '[block 150k to 152k]',
+        startHash: '0000000000006a5726622a9fc1608f47b985190390c4dd9bdc0f67a519b095df',
+        endHash: '00000000000641bff461957209503a704acdd1b00e876c7daed81fa627c60757',
+      },
     ]
 
     scanB.onTransactionHack.emit(`(start)`)
