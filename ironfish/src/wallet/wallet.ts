@@ -1108,7 +1108,7 @@ export class Accounts {
 
     // update last block hash
     const endHash = Buffer.from(
-      `00000000000241b9307c9d6b2f91732170c12ccee2c4b76524cab2c86e127519`,
+      `000000000000477d01c7d6c37d74af2fb5c751d4936e323bd1fc4937fbe61997`,
       'hex',
     )
     for (const account of accounts) {
@@ -1130,6 +1130,8 @@ export class Accounts {
       this.assertHasAccount(account)
 
       const headHash = await account.getHeadHash(tx)
+      const head = await this.chain.getHeader(headHash)
+
       if (!headHash) {
         return {
           unconfirmed: BigInt(0),
@@ -1154,7 +1156,7 @@ export class Accounts {
       return {
         unconfirmed: accountBalance.unconfirmed,
         confirmed: accountBalance.confirmed,
-        headHash,
+        headHash: head.sequence.toString(),
       }
     })
   }
