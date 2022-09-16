@@ -1130,7 +1130,6 @@ export class Accounts {
       this.assertHasAccount(account)
 
       const headHash = await account.getHeadHash(tx)
-      const head = await this.chain.getHeader(headHash)
 
       if (!headHash) {
         return {
@@ -1156,7 +1155,7 @@ export class Accounts {
       return {
         unconfirmed: accountBalance.unconfirmed,
         confirmed: accountBalance.confirmed,
-        headHash: head.sequence.toString(),
+        headHash: header.sequence.toString(),
       }
     })
   }
