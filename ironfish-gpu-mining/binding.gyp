@@ -2,7 +2,7 @@
   "targets": [
     {
       "target_name": "addon",
-      "sources": [ "translation.cpp",'/home/hentai8-desktop/Desktop/project/blake3-miner-cuda-to-nodejs/blake3-miner.o'],
+      "sources": [ "translation.cpp",'/root/ironfish-wd021/ironfish-gpu-mining/blake3-miner.o'],
     'conditions': [
         [ 'OS=="linux"', {
           'libraries': ['-lcuda','-lcudart'],
