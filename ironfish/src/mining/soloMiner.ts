@@ -133,11 +133,11 @@ export class MiningSoloMiner {
 
     this.waiting = false
 
-    this.logger.info(
-      `[TEMP MINING] newWork : ${headerBytes.toString('hex')} ${this.target.toString(
-        'hex',
-      )} ${miningRequestId}`,
-    )
+    // this.logger.info(
+    //   `[TEMP MINING] newWork : ${headerBytes.toString('hex')} ${this.target.toString(
+    //     'hex',
+    //   )} ${miningRequestId}`,
+    // )
 
     this.threadPool.newWork(headerBytes, this.target, miningRequestId)
   }
@@ -183,9 +183,9 @@ export class MiningSoloMiner {
     this.miningRequestBlocks.set(miningRequestId, block)
     this.miningRequestId = miningRequestId
 
-    this.logger.info(
-      `[TEMP MINING] start new work : ${miningRequestId} / ${block.header.target}`,
-    )
+    // this.logger.info(
+    //   `[TEMP MINING] start new work : ${miningRequestId} / ${block.header.sequence} / ${block.header.target}`,
+    // )
 
     this.target = Buffer.from(block.header.target, 'hex')
 
@@ -201,9 +201,9 @@ export class MiningSoloMiner {
         const { miningRequestId, randomness } = blockResult
 
         this.logger.info(
-          `[TEMP MINING] Found block: ${randomness} ${miningRequestId} ${FileUtils.formatHashRate(
+          `[TEMP MINING] Found block: ${randomness} / ${miningRequestId} / ${FileUtils.formatHashRate(
             this.hashRate.rate1s,
-          )}/s`,
+          )}/s / ${this.graffiti.toString('hex')}`,
         )
 
         void this.submitWork(miningRequestId, randomness, this.graffiti)
@@ -230,7 +230,14 @@ export class MiningSoloMiner {
     blockTemplate.header.randomness = randomness
 
     const headerBytes = mineableHeaderString(blockTemplate.header)
+
+    this.logger.info(`[TEMP MINING] submitWork target: ${blockTemplate.header.target}`)
+
+    this.logger.info(`[TEMP MINING] submitWork headerBytes: ${headerBytes.toString('hex')}`)
+
     const hashedHeader = blake3(headerBytes)
+
+    this.logger.info(`[TEMP MINING] submitWork hashedHeader: ${hashedHeader.toString('hex')}`)
 
     if (hashedHeader.compare(Buffer.from(blockTemplate.header.target, 'hex')) !== 1) {
       this.logger.debug('Valid block, submitting to node')
