@@ -101,6 +101,7 @@ export class MiningPoolMiner {
 
   setTarget(target: string): void {
     this.target = Buffer.from(target, 'hex')
+    this.logger.info(`[TEMP POOL MINING] setTarget : ${target}`)
   }
 
   setGraffiti(graffiti: Buffer): void {
@@ -120,6 +121,13 @@ export class MiningPoolMiner {
     headerBytes.set(this.graffiti, MINEABLE_BLOCK_HEADER_GRAFFITI_OFFSET)
 
     this.waiting = false
+
+    this.logger.info(
+      `[TEMP POOL MINING] newWork : ${headerBytes.toString('hex')} ${this.target.toString(
+        'hex',
+      )} ${miningRequestId}`,
+    )
+
     this.threadPool.newWork(headerBytes, this.target, miningRequestId)
   }
 

@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
-import { ThreadPoolHandler } from '@ironfish/rust-nodejs'
+// import { ThreadPoolHandler } from '@ironfish/rust-nodejs'
 import { blake3 } from '@napi-rs/blake-hash'
 import { Assert } from '../assert'
 import { Logger } from '../logger'
@@ -18,9 +18,9 @@ import { MINEABLE_BLOCK_HEADER_GRAFFITI_OFFSET, mineableHeaderString } from './u
 
 const RECALCULATE_TARGET_TIMEOUT = 10000
 
-export class MiningSoloMiner {
+export class GpuMiner {
   readonly hashRate: Meter
-  readonly threadPool: ThreadPoolHandler
+  // readonly threadPool: ThreadPoolHandler
   readonly logger: Logger
   readonly rpc: RpcSocketClient
 
@@ -54,8 +54,8 @@ export class MiningSoloMiner {
     this.logger = options.logger
     this.graffiti = options.graffiti
 
-    const threadCount = options.threadCount ?? 1
-    this.threadPool = new ThreadPoolHandler(threadCount, options.batchSize, true)
+    // const threadCount = options.threadCount ?? 1
+    // this.threadPool = new ThreadPoolHandler(threadCount, options.batchSize, true)
 
     this.miningRequestId = 0
     this.nextMiningRequestId = 0
@@ -132,19 +132,12 @@ export class MiningSoloMiner {
     headerBytes.set(this.graffiti, MINEABLE_BLOCK_HEADER_GRAFFITI_OFFSET)
 
     this.waiting = false
-
-    this.logger.info(
-      `[TEMP MINING] newWork : ${headerBytes.toString('hex')} ${this.target.toString(
-        'hex',
-      )} ${miningRequestId}`,
-    )
-
-    this.threadPool.newWork(headerBytes, this.target, miningRequestId)
+    // this.threadPool.newWork(headerBytes, this.target, miningRequestId)
   }
 
   waitForWork(): void {
     this.waiting = true
-    this.threadPool.pause()
+    // this.threadPool.pause()
   }
 
   private onDisconnectRpc = (): void => {
@@ -168,9 +161,6 @@ export class MiningSoloMiner {
         consensusParameters.targetBlockTimeInSeconds,
         consensusParameters.targetBucketTimeInSeconds,
       )
-
-      this.logger.info(`[TEMP MINING] new block difficulty : ${this.currentHeadDifficulty}`)
-
       this.startNewWork(payload)
     }
   }
@@ -183,10 +173,6 @@ export class MiningSoloMiner {
     this.miningRequestBlocks.set(miningRequestId, block)
     this.miningRequestId = miningRequestId
 
-    this.logger.info(
-      `[TEMP MINING] start new work : ${miningRequestId} / ${block.header.target}`,
-    )
-
     this.target = Buffer.from(block.header.target, 'hex')
 
     const work = mineableHeaderString(block.header)
@@ -195,22 +181,22 @@ export class MiningSoloMiner {
 
   private async mine(): Promise<void> {
     while (this.started) {
-      const blockResult = this.threadPool.getFoundBlock()
+      // const blockResult = this.threadPool.getFoundBlock()
 
-      if (blockResult != null) {
-        const { miningRequestId, randomness } = blockResult
+      // if (blockResult != null) {
+      //   const { miningRequestId, randomness } = blockResult
 
-        this.logger.info(
-          `[TEMP MINING] Found block: ${randomness} ${miningRequestId} ${FileUtils.formatHashRate(
-            this.hashRate.rate1s,
-          )}/s`,
-        )
+      //   this.logger.info(
+      //     `Found block: ${randomness} ${miningRequestId} ${FileUtils.formatHashRate(
+      //       this.hashRate.rate1s,
+      //     )}/s`,
+      //   )
 
-        void this.submitWork(miningRequestId, randomness, this.graffiti)
-      }
+      //   void this.submitWork(miningRequestId, randomness, this.graffiti)
+      // }
 
-      const hashRate = this.threadPool.getHashRateSubmission()
-      this.hashRate.add(hashRate)
+      // // const hashRate = this.threadPool.getHashRateSubmission()
+      // this.hashRate.add(hashRate)
 
       await PromiseUtils.sleep(10)
     }
