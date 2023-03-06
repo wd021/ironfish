@@ -11,6 +11,7 @@
 
 // Include both blake implementations
 #include "inlined-blake.hpp"
+#include "original-blake.hpp"
 
 #ifdef BLAKE3_TEST
 #include <cuda_profiler_api.h>
@@ -128,10 +129,11 @@ void config_cuda(int device_id, int *grid_size, int *block_size, bool* is_inline
     *is_inline_miner = true;
 #endif
     if(*is_inline_miner) {
-        cudaOccupancyMaxPotentialBlockSize(grid_size, block_size, inline_blake::blake3_hasher_mine);
+        // cudaOccupancyMaxPotentialBlockSize(grid_size, block_size, inline_blake::blake3_hasher_mine);
+        cudaOccupancyMaxPotentialBlockSize(grid_size, block_size, ref_blake::blake3_hasher_mine);
     } else {
-        cudaOccupancyMaxPotentialBlockSize(grid_size, block_size, inline_blake::blake3_hasher_mine);
-        // cudaOccupancyMaxPotentialBlockSize(grid_size, block_size, ref_blake::blake3_hasher_mine);
+        // cudaOccupancyMaxPotentialBlockSize(grid_size, block_size, inline_blake::blake3_hasher_mine);
+        cudaOccupancyMaxPotentialBlockSize(grid_size, block_size, ref_blake::blake3_hasher_mine);
     }
     
     int cores_size = get_device_cores(device_id);

@@ -87,10 +87,10 @@ char* mine(const char *header_string, const char *target_string){
     blob_t target;
     hex_to_bytes(target_string, &target);
 
-    inline_blake::blake3_hasher *hasher;
-    inline_blake::blake3_hasher *device_hasher1;
-    TRY(cudaMallocHost(&hasher, sizeof(inline_blake::blake3_hasher)));
-    TRY(cudaMalloc(&device_hasher1, sizeof(inline_blake::blake3_hasher)));
+    ref_blake::blake3_hasher *hasher;
+    ref_blake::blake3_hasher *device_hasher1;
+    TRY(cudaMallocHost(&hasher, sizeof(ref_blake::blake3_hasher)));
+    TRY(cudaMalloc(&device_hasher1, sizeof(ref_blake::blake3_hasher)));
 
     bzero(hasher->buf, BLAKE3_BUF_CAP);
     cudaMemcpy(hasher->buf, blob.blob, sizeof(BLAKE3_BUF_CAP), cudaMemcpyHostToDevice);
@@ -102,12 +102,12 @@ char* mine(const char *header_string, const char *target_string){
 
     cudaStream_t stream;
     TRY(cudaStreamCreate(&stream));
-    TRY(cudaMemcpyAsync(device_hasher1, hasher, sizeof(inline_blake::blake3_hasher), cudaMemcpyHostToDevice, stream));
-    inline_blake::blake3_hasher_mine<<<92, 256, 0, stream>>>(device_hasher1);
+    TRY(cudaMemcpyAsync(device_hasher1, hasher, sizeof(ref_blake::blake3_hasher), cudaMemcpyHostToDevice, stream));
+    ref_blake::blake3_hasher_mine<<<92, 256, 0, stream>>>(device_hasher1);
     TRY(cudaStreamSynchronize(stream));
     cudaDeviceSynchronize();
 
-    TRY(cudaMemcpy(hasher, device_hasher1, sizeof(inline_blake::blake3_hasher), cudaMemcpyDeviceToHost));
+    TRY(cudaMemcpy(hasher, device_hasher1, sizeof(ref_blake::blake3_hasher), cudaMemcpyDeviceToHost));
     char *hash_string1 = bytes_to_hex(hasher->hash, 32);
     char *buf_string1 = bytes_to_hex(hasher->buf, 208);
     printf("good: %d\n", hasher->found_good_hash);
