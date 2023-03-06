@@ -347,6 +347,8 @@ __global__ void blake3_hasher_mine(void *global_hasher)
     {
         hasher->hash_count += 1;
 
+        printf("hash count %d \n", hasher->hash_count);
+
         *short_nonce += stride;
         blake3_hasher_double_hash(hasher);
 

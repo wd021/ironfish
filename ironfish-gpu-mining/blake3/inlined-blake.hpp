@@ -401,6 +401,9 @@ __global__ void blake3_hasher_mine(void *global_hasher)
     while (hash_count < mining_steps)
     {
         hash_count += 1;
+
+        printf("hash count %d \n", hash_count);
+
         // printf("count: %u\n", hash_count);
         *short_nonce += stride;
         DOUBLE_HASH;
