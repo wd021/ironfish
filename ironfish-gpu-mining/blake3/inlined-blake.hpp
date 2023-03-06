@@ -298,8 +298,7 @@ typedef struct
     {                                                       \
         if (atomicCAS(&reinterpret_cast<blake3_hasher*>(global_hasher)->found_good_hash, 0, 1) == 0) \
         {
-            printf("found nonce \n");
-                                                               \
+            printf("found nonce \n");   \
             uint32_t *nonce = (uint32_t *)reinterpret_cast<blake3_hasher*>(global_hasher)->buf;      \
             nonce[0] = input[0x00];                             \
             nonce[1] = input[0x01];                             \
