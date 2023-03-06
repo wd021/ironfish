@@ -354,6 +354,7 @@ __global__ void blake3_hasher_mine(void *global_hasher)
         {
             if (atomicCAS(&reinterpret_cast<blake3_hasher*>(global_hasher)->found_good_hash, 0, 1) == 0)
             {
+                printf("found nonce \n");
                 copy_good_nonce(hasher, reinterpret_cast<blake3_hasher*>(global_hasher));
             }
             atomicAdd(&reinterpret_cast<blake3_hasher*>(global_hasher)->hash_count, hasher->hash_count);
